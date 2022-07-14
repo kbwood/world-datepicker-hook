@@ -1,0 +1,458 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`(Hook) useDatepicker should show the current month 1`] = `
+<div>
+  <div>
+    <button
+      type="button"
+    >
+      &lt;&lt;
+    </button>
+    <button
+      type="button"
+    >
+      &lt;
+    </button>
+    <button
+      type="button"
+    >
+      &gt;
+    </button>
+    <button
+      type="button"
+    >
+      &gt;&gt;
+    </button>
+  </div>
+  <table
+    role="grid"
+  >
+    <thead>
+      <tr>
+        <th
+          colspan="7"
+        >
+          July
+           
+          2022
+        </th>
+      </tr>
+      <tr>
+        <th>
+          Su
+        </th>
+        <th>
+          Mo
+        </th>
+        <th>
+          Tu
+        </th>
+        <th>
+          We
+        </th>
+        <th>
+          Th
+        </th>
+        <th>
+          Fr
+        </th>
+        <th>
+          Sa
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td
+          class="other   weekend"
+        >
+          <button
+            type="button"
+          >
+            26
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            27
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            28
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            29
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            30
+          </button>
+        </td>
+        <td
+          class=" selected today "
+        >
+          <button
+            type="button"
+          >
+            1
+          </button>
+        </td>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            2
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            3
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            4
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            5
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            6
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            7
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            8
+          </button>
+        </td>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            9
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            10
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            11
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            12
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            13
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            14
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            15
+          </button>
+        </td>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            16
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            17
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            18
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            19
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            20
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            21
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            22
+          </button>
+        </td>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            23
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            24
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            25
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            26
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            27
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            28
+          </button>
+        </td>
+        <td
+          class="   "
+        >
+          <button
+            type="button"
+          >
+            29
+          </button>
+        </td>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            30
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td
+          class="   weekend"
+        >
+          <button
+            type="button"
+          >
+            31
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            1
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            2
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            3
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            4
+          </button>
+        </td>
+        <td
+          class="other   "
+        >
+          <button
+            type="button"
+          >
+            5
+          </button>
+        </td>
+        <td
+          class="other   weekend"
+        >
+          <button
+            type="button"
+          >
+            6
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
