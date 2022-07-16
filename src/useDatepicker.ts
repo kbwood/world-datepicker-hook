@@ -46,6 +46,15 @@ type Datepicker = {
   local: Local,
   updates: Updates,
 }
+type Props = {
+  calendarName: string,
+  date?: CDate,
+  language?: string,
+  maxDate?: CDate,
+  minDate?: CDate,
+  onSelect: NotifyDate,
+}
+type OptCDate = CDate | undefined
 
 const generateCurrent = (curDate: CDate): Current => {
   const calendar = curDate.calendar();
@@ -59,7 +68,13 @@ const generateCurrent = (curDate: CDate): Current => {
   };
 };
 
-const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): Day[][] => {
+const generateDays = (
+  onSelect: NotifyDate,
+  curDate: CDate,
+  setCurDate: NotifyDate,
+  minDate: OptCDate,
+  maxDate: OptCDate
+): Day[][] => {
   const calendar = curDate.calendar();
   const localiseDigits = calendar.local.localiseDigits || (value => value);
   const today = calendar.date();
@@ -81,9 +96,11 @@ const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDa
   let week = 0;
   while (forDay.compareTo(monthEnd) <= 0) {
     const thisDay = forDay.date();
+    const isDisabled = (!!minDate && thisDay.compareTo(minDate) === -1) ||
+      (!!maxDate && thisDay.compareTo(maxDate) === 1);
     const day = {
       date: thisDay,
-      isDisabled: false,
+      isDisabled,
       isInCurrentMonth: thisDay.month() === curDate.month(),
       isSelected: thisDay.compareTo(curDate) === 0,
       isToday: thisDay.compareTo(today) === 0,
@@ -104,7 +121,8 @@ const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDa
 };
 
 const generateLocal = (curDate: CDate): Local => {
-  const { dayNames, dayNamesMin, dayNamesShort, firstDay, isRTL, monthNames, monthNamesShort } = curDate.calendar().local;
+  const { dayNames, dayNamesMin, dayNamesShort, firstDay, isRTL, monthNames, monthNamesShort } =
+    curDate.calendar().local;
   return {
     dayNames: [...dayNames.slice(firstDay), ...dayNames.slice(0, firstDay)],
     dayNamesMin: [...dayNamesMin.slice(firstDay), ...dayNamesMin.slice(0, firstDay)],
@@ -121,33 +139,44 @@ const getStartOfWeek = (date: CDate): CDate =>
 const getEndOfWeek = (date: CDate): CDate =>
   getStartOfWeek(date).add(date.calendar().daysInWeek() - 1, 'd');
 
-const generateUpdates = (curDate: CDate, setCurDate: NotifyDate): Updates => {
+const max = (d1: CDate, d2: CDate = d1): CDate => d1.compareTo(d2) === 1 ? d1 : d2;
+
+const min = (d1: CDate, d2: CDate = d1): CDate => d1.compareTo(d2) === -1 ? d1 : d2;
+
+const generateUpdates = (curDate: CDate, setCurDate: NotifyDate, minDate: OptCDate, maxDate: OptCDate): Updates => {
+  const setTarget = (target: CDate) => () => { setCurDate(max(min(target, maxDate), minDate)); };
   return {
-    nextDay: () => { setCurDate(curDate.add(1, 'd')); },
-    nextMonth: () => { setCurDate(curDate.add(1, 'm')); },
-    nextWeek: () => { setCurDate(curDate.add(1, 'w')); },
-    nextYear: () => { setCurDate(curDate.add(1, 'y')); },
-    prevDay: () => { setCurDate(curDate.sub(1, 'd')); },
-    prevMonth: () => { setCurDate(curDate.sub(1, 'm')); },
-    prevWeek: () => { setCurDate(curDate.sub(1, 'w')); },
-    prevYear: () => { setCurDate(curDate.sub(1, 'y')); },
-    today: () => { setCurDate(curDate.calendar().date()); },
-    weekEnd: () => { setCurDate(getEndOfWeek(curDate)); },
-    weekStart: () => { setCurDate(getStartOfWeek(curDate)); }
+    nextDay: setTarget(curDate.add(1, 'd')),
+    nextMonth: setTarget(curDate.add(1, 'm')),
+    nextWeek: setTarget(curDate.add(1, 'w')),
+    nextYear: setTarget(curDate.add(1, 'y')),
+    prevDay: setTarget(curDate.sub(1, 'd')),
+    prevMonth: setTarget(curDate.sub(1, 'm')),
+    prevWeek: setTarget(curDate.sub(1, 'w')),
+    prevYear: setTarget(curDate.sub(1, 'y')),
+    today: setTarget(curDate.calendar().date()),
+    weekEnd: setTarget(getEndOfWeek(curDate)),
+    weekStart: setTarget(getStartOfWeek(curDate))
   };
 };
 
-const generateDatepicker = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): Datepicker => ({
+const generateDatepicker = (
+  onSelect: NotifyDate,
+  curDate: CDate,
+  setCurDate: NotifyDate,
+  minDate: OptCDate,
+  maxDate: OptCDate
+): Datepicker => ({
   current: generateCurrent(curDate),
-  days: generateDays(onSelect, curDate, setCurDate),
+  days: generateDays(onSelect, curDate, setCurDate, minDate, maxDate),
   local: generateLocal(curDate),
-  updates: generateUpdates(curDate, setCurDate)
+  updates: generateUpdates(curDate, setCurDate, minDate, maxDate)
 });
 
-const useDatepicker = (onSelect: NotifyDate, calendarName: string, language: string = '', date?: CDate) => {
+const useDatepicker = ({ calendarName, date, language = '', maxDate, minDate, onSelect }: Props) => {
   const calendar = Calendars.instance(calendarName, language);
   const [curDate, setCurDate] = useState<CDate>(date || calendar.date());
-  const [datepicker, setDatepicker] = useState<Datepicker>(generateDatepicker(onSelect, curDate, setCurDate));
+  const [datepicker, setDatepicker] = useState<Datepicker>(generateDatepicker(onSelect, curDate, setCurDate, minDate, maxDate));
 
   useEffect(() => {
     const newDate = date || calendar.date();
@@ -157,8 +186,8 @@ const useDatepicker = (onSelect: NotifyDate, calendarName: string, language: str
   }, [calendar, date]);
 
   useEffect(() => {
-    setDatepicker(generateDatepicker(onSelect, curDate, setCurDate));
-  }, [curDate, onSelect, setCurDate, setDatepicker]);
+    setDatepicker(generateDatepicker(onSelect, curDate, setCurDate, minDate, maxDate));
+  }, [curDate, maxDate, minDate, onSelect, setCurDate, setDatepicker]);
 
   return datepicker;
 };

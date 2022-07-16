@@ -6,6 +6,7 @@ const Styles = () => {
     .datepicker.ltr { direction: ltr; }
     .datepicker.rtl { direction: rtl; }
     .datepicker button { background-color: transparent; border: 0; cursor: pointer; font-size: 90%; padding: 0.5em; }
+    .datepicker button[disabled] { color: #888; }
     .datepicker table { width: 100%; }
     .datepicker table button { width: 100%; }
     .datepicker td { text-align: center; }

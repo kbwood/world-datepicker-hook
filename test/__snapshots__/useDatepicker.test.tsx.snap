@@ -53,10 +53,10 @@ exports[`(Hook) useDatepicker Default should show the current month 1`] = `
     </button>
   </td>
   <td
-    class=" selected today "
+    class="   "
   >
     <button
-      tabindex="0"
+      tabindex="-1"
       type="button"
     >
       1
@@ -118,10 +118,10 @@ exports[`(Hook) useDatepicker Localised should show the current month 1`] = `
     </button>
   </td>
   <td
-    class=" selected today "
+    class="   "
   >
     <button
-      tabindex="0"
+      tabindex="-1"
       type="button"
     >
       一

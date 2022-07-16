@@ -7,13 +7,16 @@ import MonthHeader from './MonthHeader';
 import Styles from './Styles';
 
 type Props = {
-  calendarName: string
-  language?: string
-  onSelect: (date: CDate) => void
+  calendarName: string,
+  date?: CDate,
+  language?: string,
+  maxDate?: CDate,
+  minDate?: CDate,
+  onSelect: (date: CDate) => void,
 }
 
-const Datepicker = ({ calendarName, language = '', onSelect }: Props) => {
-  const datepicker = useDatepicker(onSelect, calendarName, language);
+const Datepicker = ({ calendarName, date, language = '', maxDate, minDate, onSelect }: Props) => {
+  const datepicker = useDatepicker({ calendarName, date, language, maxDate, minDate, onSelect });
   return (
     <div className={`datepicker ${datepicker.local.isRTL ? 'rtl' : 'ltr'}`}>
       <Styles />
