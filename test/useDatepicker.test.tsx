@@ -1,24 +1,26 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Calendars from '@kbwood/world-calendars';
+import Calendars, { CDate } from '@kbwood/world-calendars';
 import '@kbwood/world-calendars/lib/Gregorian';
-import useDatepicker, { Datepicker } from '../src/useDatepicker';
+import '@kbwood/world-calendars/lib/l10n/Gregorian-zh-CN';
+import useDatepicker, { Day } from '../src/useDatepicker';
+
+type TestProps = {
+  date?: CDate,
+  language?: string,
+}
 
 describe('(Hook) useDatepicker', () => {
   const gregorian = Calendars.instance('gregorian');
   const user = userEvent.setup();
   const onSelect = jest.fn();
 
-  const generateWeeks = ({ calendarDays, weekDays }: Datepicker) => {
-    const daysInWeek = weekDays.length;
-    const countWeeks = calendarDays.length / daysInWeek;
-    const weeks = [];
-    for (let w = 0; w < countWeeks; w += 1) {
-      const week = calendarDays.slice(w * daysInWeek, (w + 1) * daysInWeek);
-      weeks.push(
+  const generateWeeks = (days: Day[][]) => (
+    <tbody>
+      {days.map(week => (
         <tr key={`w${week[0].date.toString()}`}>
-          {weekDays.map((_, d) => {
+          {week.map(day => {
             const {
               date,
               isDisabled,
@@ -28,56 +30,76 @@ describe('(Hook) useDatepicker', () => {
               isWeekend,
               label,
               onClick
-            } = week[d];
+            } = day;
             const className = `${isInCurrentMonth ? '' : 'other'} ${
               isSelected ? 'selected' : ''
             } ${isToday ? 'today' : ''} ${isWeekend ? 'weekend' : ''}`;
             return (
               <td key={date.toString()} className={className}>
-                <button disabled={isDisabled} onClick={onClick} type="button">
+                <button disabled={isDisabled} onClick={onClick} tabIndex={isSelected ? 0 : -1} type="button">
                   {label}
                 </button>
               </td>
             );
           })}
         </tr>
-      );
-    }
-    return weeks;
-  };
+      ))}
+    </tbody>
+  );
 
-  const TestDatepicker = () => {
-    const datepicker = useDatepicker(onSelect, 'Gregorian', '');
+  const TestDatepicker = ({ date, language }: TestProps) => {
+    const { current, days, local, updates } = useDatepicker(onSelect, 'Gregorian', language, date);
     return (
       <>
         <div>
-          <button onClick={datepicker.updates.prevYear} type="button">
-            &lt;&lt;
+          <button onClick={updates.prevYear} type="button">
+            Prev year
           </button>
-          <button onClick={datepicker.updates.prevMonth} type="button">
-            &lt;
+          <button onClick={updates.prevMonth} type="button">
+            Prev month
           </button>
-          <button onClick={datepicker.updates.nextMonth} type="button">
-            &gt;
+          <button onClick={updates.prevWeek} type="button">
+            Prev week
           </button>
-          <button onClick={datepicker.updates.nextYear} type="button">
-            &gt;&gt;
+          <button onClick={updates.prevDay} type="button">
+            Prev day
+          </button>
+          <button onClick={updates.weekStart} type="button">
+            Start week
+          </button>
+          <button onClick={updates.today} type="button">
+            Today
+          </button>
+          <button onClick={updates.weekEnd} type="button">
+            End week
+          </button>
+          <button onClick={updates.nextDay} type="button">
+            Next day
+          </button>
+          <button onClick={updates.nextWeek} type="button">
+            Next week
+          </button>
+          <button onClick={updates.nextMonth} type="button">
+            Next month
+          </button>
+          <button onClick={updates.nextYear} type="button">
+            Next year
           </button>
         </div>
         <table role="grid">
           <thead>
             <tr key="month">
-              <th colSpan={datepicker.weekDays.length}>
-                {datepicker.month.name} {datepicker.year}
+              <th colSpan={local.dayNames.length}>
+                {current.monthName} {current.yearLocal}
               </th>
             </tr>
             <tr key="days">
-              {datepicker.weekDays.map((day) => (
+              {local.dayNamesMin.map(day => (
                 <th key={day}>{day}</th>
               ))}
             </tr>
           </thead>
-          <tbody>{generateWeeks(datepicker)}</tbody>
+          {generateWeeks(days)}
         </table>
       </>
     );
@@ -96,58 +118,141 @@ describe('(Hook) useDatepicker', () => {
     jest.clearAllMocks();
   });
 
-  it('should show the current month', () => {
-    expect(render(<TestDatepicker />).container).toMatchSnapshot();
+  describe('Default', () => {
+    it('should show the current month', () => {
+      render(<TestDatepicker />);
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getByRole('row', { name: 'Su Mo Tu We Th Fr Sa' })).toBeInTheDocument();
+      expect(screen.getAllByRole('row')[2]).toMatchSnapshot();
+    });
+
+    it('should respond to moving to the previous year', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Prev year' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2021' })).toBeInTheDocument();
+    });
+
+    it('should respond to moving to the previous month', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Prev month' }));
+
+      expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
+    });
+
+    it('should respond to moving to the previous week', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Prev week' }));
+
+      expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '24' })).toHaveClass('selected');
+    });
+
+    it('should respond to moving to the previous day', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Prev day' }));
+
+      expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getAllByRole('cell', { name: '30' })[1]).toHaveClass('selected');
+    });
+
+    it('should respond to moving to the start of the week', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Start week' }));
+
+      expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '26' })).toHaveClass('selected');
+    });
+
+    it('should respond to moving to today', async () => {
+      render(<TestDatepicker date={gregorian.date(2022, 7, 19)} />);
+
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '19' })).toHaveClass('selected');
+
+      await user.click(screen.getByRole('button', { name: 'Today' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '19' })).not.toHaveClass('selected');
+    });
+
+    it('should respond to moving to the end of the week', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'End week' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getAllByRole('cell', { name: '2' })[0]).toHaveClass('selected');
+    });
+
+    it('should respond to moving to the next day', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Next day' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getAllByRole('cell', { name: '2' })[0]).toHaveClass('selected');
+    });
+
+    it('should respond to moving to the next week', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Next week' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '8' })).toHaveClass('selected');
+    });
+
+    it('should respond to moving to the next month', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Next month' }));
+
+      expect(screen.getByRole('columnheader', { name: 'August 2022' })).toBeInTheDocument();
+    });
+
+    it('should respond to moving to the next year', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Next year' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2023' })).toBeInTheDocument();
+    });
+
+    it('should respond to selecting a date', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: '19' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getByRole('cell', { name: '19' })).toHaveClass('selected');
+      expect(onSelect).toHaveBeenCalledTimes(1);
+      expect(onSelect).toHaveBeenCalledWith(gregorian.date(2022, 7, 19));
+    });
+
+    it('should respond to selecting a date in another month', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getAllByRole('button', { name: '29' })[0]);
+
+      expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
+      expect(screen.getAllByRole('cell', { name: '29' })[0]).not.toHaveClass('selected');
+      expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
+      expect(screen.getAllByRole('cell', { name: '29' })[1]).toHaveClass('selected');
+      expect(onSelect).toHaveBeenCalledTimes(1);
+      expect(onSelect).toHaveBeenCalledWith(gregorian.date(2022, 6, 29));
+    });
   });
 
-  it('should respond to moving to the previous year', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getByRole('button', { name: '<<' }));
+  describe('Localised', () => {
+    it('should show the current month', () => {
+      render(<TestDatepicker language="zh-CN" />);
 
-    expect(screen.getByRole('columnheader', { name: 'July 2021' })).toBeInTheDocument();
-  });
-
-  it('should respond to moving to the previous month', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getByRole('button', { name: '<' }));
-
-    expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
-  });
-
-  it('should respond to moving to the next month', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getByRole('button', { name: '>' }));
-
-    expect(screen.getByRole('columnheader', { name: 'August 2022' })).toBeInTheDocument();
-  });
-
-  it('should respond to moving to the next year', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getByRole('button', { name: '>>' }));
-
-    expect(screen.getByRole('columnheader', { name: 'July 2023' })).toBeInTheDocument();
-  });
-
-  it('should respond to selecting a date', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getByRole('button', { name: '19' }));
-
-    expect(screen.getByRole('columnheader', { name: 'July 2022' })).toBeInTheDocument();
-    expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
-    expect(screen.getByRole('cell', { name: '19' })).toHaveClass('selected');
-    expect(onSelect).toHaveBeenCalledTimes(1);
-    expect(onSelect).toHaveBeenCalledWith(gregorian.date(2022, 7, 19));
-  });
-
-  it('should respond to selecting a date in another month', async () => {
-    render(<TestDatepicker />);
-    await user.click(screen.getAllByRole('button', { name: '29' })[0]);
-
-    expect(screen.getByRole('columnheader', { name: 'June 2022' })).toBeInTheDocument();
-    expect(screen.getAllByRole('cell', { name: '29' })[0]).not.toHaveClass('selected');
-    expect(screen.getAllByRole('cell', { name: '1' })[0]).not.toHaveClass('selected');
-    expect(screen.getAllByRole('cell', { name: '29' })[1]).toHaveClass('selected');
-    expect(onSelect).toHaveBeenCalledTimes(1);
-    expect(onSelect).toHaveBeenCalledWith(gregorian.date(2022, 6, 29));
+      expect(screen.getByRole('columnheader', { name: '七月 二千二十二' })).toBeInTheDocument();
+      expect(screen.getByRole('row', { name: '一 二 三 四 五 六 日' })).toBeInTheDocument();
+      expect(screen.getAllByRole('row')[2]).toMatchSnapshot();
+    });
   });
 });

@@ -2,7 +2,14 @@ import { MouseEventHandler, useEffect, useState } from 'react';
 import Calendars, { CDate } from '@kbwood/world-calendars';
 
 type NotifyDate = (date: CDate) => void
-type CalendarDay = {
+type Current = {
+  month: number,
+  monthName: string,
+  monthNameShort: string,
+  year: number,
+  yearLocal: string,
+}
+type Day = {
   date: CDate,
   isDisabled: boolean,
   isInCurrentMonth: boolean,
@@ -12,7 +19,15 @@ type CalendarDay = {
   label: string,
   onClick: MouseEventHandler,
 }
-type DatepickerUpdates = {
+type Local = {
+  dayNames: string[],
+  dayNamesMin: string[],
+  dayNamesShort: string[],
+  isRTL: boolean,
+  monthNames: string[],
+  monthNamesShort: string[],
+}
+type Updates = {
   nextDay: MouseEventHandler,
   nextMonth: MouseEventHandler,
   nextWeek: MouseEventHandler,
@@ -21,23 +36,30 @@ type DatepickerUpdates = {
   prevMonth: MouseEventHandler,
   prevWeek: MouseEventHandler,
   prevYear: MouseEventHandler,
+  today: MouseEventHandler,
   weekEnd: MouseEventHandler,
   weekStart: MouseEventHandler,
 }
-type MonthData = {
-  name: string,
-  num: number,
-}
 type Datepicker = {
-  calendarDays: CalendarDay[],
-  isRTL: boolean,
-  month: MonthData,
-  updates: DatepickerUpdates,
-  weekDays: string[],
-  year: number,
+  current: Current,
+  days: Day[][],
+  local: Local,
+  updates: Updates,
 }
 
-const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): CalendarDay[] => {
+const generateCurrent = (curDate: CDate): Current => {
+  const calendar = curDate.calendar();
+  const yearString = `${curDate.year()}`;
+  return {
+    month: curDate.month(),
+    monthName: calendar.local.monthNames[curDate.month() - calendar.firstMonth],
+    monthNameShort: calendar.local.monthNamesShort[curDate.month() - calendar.firstMonth],
+    year: curDate.year(),
+    yearLocal: calendar.local.localiseDigits ? calendar.local.localiseDigits(yearString) : yearString
+  };
+};
+
+const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): Day[][] => {
   const calendar = curDate.calendar();
   const localiseDigits = calendar.local.localiseDigits || (value => value);
   const today = calendar.date();
@@ -54,8 +76,9 @@ const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDa
   );
   const monthEnd = monthStart.add(weekCount, 'w').sub(1, 'd');
 
-  const days: CalendarDay[] = [];
+  const days: Day[][] = [];
   let forDay = monthStart;
+  let week = 0;
   while (forDay.compareTo(monthEnd) <= 0) {
     const thisDay = forDay.date();
     const day = {
@@ -68,13 +91,37 @@ const generateDays = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDa
       label: `${localiseDigits(String(thisDay.day()))}`,
       onClick: () => { setCurDate(thisDay); onSelect(thisDay); }
     };
-    days.push(day);
+    if (!days[week]) {
+      days[week] = [];
+    }
+    days[week].push(day);
     forDay = forDay.add(1, 'd');
+    if (forDay.dayOfWeek() === calendar.local.firstDay) {
+      week += 1;
+    }
   }
   return days;
 };
 
-const generateUpdates = (curDate: CDate, setCurDate: NotifyDate): DatepickerUpdates => {
+const generateLocal = (curDate: CDate): Local => {
+  const { dayNames, dayNamesMin, dayNamesShort, firstDay, isRTL, monthNames, monthNamesShort } = curDate.calendar().local;
+  return {
+    dayNames: [...dayNames.slice(firstDay), ...dayNames.slice(0, firstDay)],
+    dayNamesMin: [...dayNamesMin.slice(firstDay), ...dayNamesMin.slice(0, firstDay)],
+    dayNamesShort: [...dayNamesShort.slice(firstDay), ...dayNamesShort.slice(0, firstDay)],
+    isRTL,
+    monthNames,
+    monthNamesShort
+  };
+};
+
+const getStartOfWeek = (date: CDate): CDate =>
+  date.sub(date.dayOfWeek(), 'd').add(date.calendar().local.firstDay, 'd');
+
+const getEndOfWeek = (date: CDate): CDate =>
+  getStartOfWeek(date).add(date.calendar().daysInWeek() - 1, 'd');
+
+const generateUpdates = (curDate: CDate, setCurDate: NotifyDate): Updates => {
   return {
     nextDay: () => { setCurDate(curDate.add(1, 'd')); },
     nextMonth: () => { setCurDate(curDate.add(1, 'm')); },
@@ -84,25 +131,18 @@ const generateUpdates = (curDate: CDate, setCurDate: NotifyDate): DatepickerUpda
     prevMonth: () => { setCurDate(curDate.sub(1, 'm')); },
     prevWeek: () => { setCurDate(curDate.sub(1, 'w')); },
     prevYear: () => { setCurDate(curDate.sub(1, 'y')); },
-    weekEnd: () => { setCurDate(curDate.add(1, 'd')); },
-    weekStart: () => { setCurDate(curDate.sub(1, 'd')); }
+    today: () => { setCurDate(curDate.calendar().date()); },
+    weekEnd: () => { setCurDate(getEndOfWeek(curDate)); },
+    weekStart: () => { setCurDate(getStartOfWeek(curDate)); }
   };
 };
 
-const generateDatepicker = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): Datepicker => {
-  const calendar = curDate.calendar();
-  return {
-    calendarDays: generateDays(onSelect, curDate, setCurDate),
-    isRTL: calendar.local.isRTL,
-    month: {
-      name: calendar.local.monthNames[curDate.month() - calendar.firstMonth],
-      num: curDate.month()
-    },
-    updates: generateUpdates(curDate, setCurDate),
-    weekDays: calendar.local.dayNamesMin,
-    year: curDate.year()
-  };
-};
+const generateDatepicker = (onSelect: NotifyDate, curDate: CDate, setCurDate: NotifyDate): Datepicker => ({
+  current: generateCurrent(curDate),
+  days: generateDays(onSelect, curDate, setCurDate),
+  local: generateLocal(curDate),
+  updates: generateUpdates(curDate, setCurDate)
+});
 
 const useDatepicker = (onSelect: NotifyDate, calendarName: string, language: string = '', date?: CDate) => {
   const calendar = Calendars.instance(calendarName, language);
@@ -123,5 +163,5 @@ const useDatepicker = (onSelect: NotifyDate, calendarName: string, language: str
   return datepicker;
 };
 
-export type { CalendarDay, Datepicker, DatepickerUpdates, MonthData, NotifyDate };
+export type { Current, Datepicker, Day, Local, NotifyDate, Updates };
 export default useDatepicker;
