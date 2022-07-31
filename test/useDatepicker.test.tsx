@@ -4,16 +4,18 @@ import userEvent from '@testing-library/user-event';
 import Calendars, { CDate } from '@kbwood/world-calendars';
 import '@kbwood/world-calendars/lib/Gregorian';
 import '@kbwood/world-calendars/lib/l10n/Gregorian-zh-CN';
-import useDatepicker, { Day } from '../src/useDatepicker';
+import useDatepicker, { Day, DisplayOptions, LocalMonth, LocalYear } from '../src/useDatepicker';
 
 type TestProps = {
   date?: CDate,
   language?: string,
   maxDate?: CDate,
   minDate?: CDate,
+  options?: DisplayOptions,
 }
 
 describe('(Hook) useDatepicker', () => {
+  const defaultOptions = { selectDaysInOtherMonths: true, showDaysInOtherMonths: true };
   const gregorian = Calendars.instance('gregorian');
   const user = userEvent.setup();
   const onSelect = jest.fn();
@@ -31,14 +33,19 @@ describe('(Hook) useDatepicker', () => {
               isToday,
               isWeekend,
               label,
-              onClick
+              selectDay
             } = day;
             const className = `${isInCurrentMonth ? '' : 'other'} ${
               isSelected ? 'selected' : ''
             } ${isToday ? 'today' : ''} ${isWeekend ? 'weekend' : ''}`;
             return (
               <td key={date.toString()} className={className}>
-                <button disabled={isDisabled} onClick={onClick} tabIndex={isSelected ? 0 : -1} type="button">
+                <button
+                  disabled={isDisabled}
+                  onClick={() => { selectDay(); }}
+                  tabIndex={isSelected ? 0 : -1}
+                  type="button"
+                >
                   {label}
                 </button>
               </td>
@@ -49,56 +56,75 @@ describe('(Hook) useDatepicker', () => {
     </tbody>
   );
 
-  const TestDatepicker = ({ date, language, maxDate, minDate }: TestProps) => {
+  const generateMonths = (months: LocalMonth[]) => (
+    <select>
+      {months.map(({ disabled, name }) => <option key={name} disabled={disabled}>{name}</option>)}
+    </select>
+  );
+
+  const generateYears = (years: LocalYear[]) => (
+    <select>
+      {years.map(({ name }) => <option key={name}>{name}</option>)}
+    </select>
+  );
+
+  const TestDatepicker = ({ date, language, maxDate, minDate, options = defaultOptions }: TestProps) => {
     const { current, days, local, updates } =
-      useDatepicker({ calendarName: 'Gregorian', date, language, maxDate, minDate, onSelect });
+      useDatepicker({ calendarName: 'Gregorian', date, language, maxDate, minDate, onSelect, options });
     return (
       <>
         <div>
-          <button onClick={updates.prevYear} type="button">
+          <button onClick={() => { updates.prevYear(); }} type="button">
             Prev year
           </button>
-          <button onClick={updates.prevMonth} type="button">
+          <button onClick={() => { updates.prevMonth(); }} type="button">
             Prev month
           </button>
-          <button onClick={updates.prevWeek} type="button">
+          <button onClick={() => { updates.prevWeek(); }} type="button">
             Prev week
           </button>
-          <button onClick={updates.prevDay} type="button">
+          <button onClick={() => { updates.prevDay(); }} type="button">
             Prev day
           </button>
-          <button onClick={updates.weekStart} type="button">
+          <button onClick={() => { updates.weekStart(); }} type="button">
             Start week
           </button>
-          <button onClick={updates.today} type="button">
+          <button onClick={() => { updates.today(); }} type="button">
             Today
           </button>
-          <button onClick={updates.weekEnd} type="button">
+          <button onClick={() => { updates.weekEnd(); }} type="button">
             End week
           </button>
-          <button onClick={updates.nextDay} type="button">
+          <button onClick={() => { updates.nextDay(); }} type="button">
             Next day
           </button>
-          <button onClick={updates.nextWeek} type="button">
+          <button onClick={() => { updates.nextWeek(); }} type="button">
             Next week
           </button>
-          <button onClick={updates.nextMonth} type="button">
+          <button onClick={() => { updates.nextMonth(); }} type="button">
             Next month
           </button>
-          <button onClick={updates.nextYear} type="button">
+          <button onClick={() => { updates.nextYear(); }} type="button">
             Next year
+          </button>
+          <button onClick={() => { updates.setMonth('5'); }} type="button">
+            Set month
+          </button>
+          <button onClick={() => { updates.setYear('2020'); }} type="button">
+            Set year
           </button>
         </div>
         <table role="grid">
           <thead>
             <tr key="month">
-              <th colSpan={local.dayNames.length}>
-                {current.monthName} {current.yearLocal}
+              <th colSpan={local.days.length}>
+                {options.selectMonth ? generateMonths(local.months) : current.monthName}{' '}
+                {options.selectYear ? generateYears(local.years) : current.yearLocal}
               </th>
             </tr>
             <tr key="days">
-              {local.dayNamesMin.map(day => (
-                <th key={day}>{day}</th>
+              {local.days.map(({ name, nameMin }) => (
+                <th key={name}>{nameMin}</th>
               ))}
             </tr>
           </thead>
@@ -129,6 +155,98 @@ describe('(Hook) useDatepicker', () => {
       expect(screen.getByRole('row', { name: 'Su Mo Tu We Th Fr Sa' })).toBeInTheDocument();
       expect(screen.getByRole('cell', { name: '13' })).toHaveClass('selected');
       expect(screen.getAllByRole('row')[2]).toMatchSnapshot();
+    });
+
+    it('should not show days in other months', () => {
+      render(<TestDatepicker options={{ showDaysInOtherMonths: false }}/>);
+
+      expect(screen.getAllByRole('row')[2]).toMatchSnapshot();
+    });
+
+    it('should allow month selection when requested', () => {
+      render(<TestDatepicker options={{ selectMonth: true }}/>);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(12);
+      for (let i = 0; i < select.options.length; i += 1) {
+        const option = select.options.item(i);
+        expect((option || {}).text).toBe(gregorian.local.monthNames[i]);
+      }
+    });
+
+    it('should limit month selection when restricted by min/max date', () => {
+      render(
+        <TestDatepicker
+          maxDate={gregorian.date(2022, 10, 13)}
+          minDate={gregorian.date(2022, 3, 13)}
+          options={{ selectMonth: true }}
+        />
+      );
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(12);
+      for (let i = 0; i < select.options.length; i += 1) {
+        const option = select.options.item(i);
+        expect(option).not.toBeNull();
+        expect((option || {}).text).toBe(gregorian.local.monthNames[i]);
+        expect((option || {}).disabled).toBe(i < 2 || i > 9);
+      }
+    });
+
+    it('should allow year selection when requested', () => {
+      render(<TestDatepicker options={{ selectYear: true, yearRange: '2020:2025' }}/>);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(6);
+      for (let i = 0; i < select.options.length; i += 1) {
+        const option = select.options.item(i);
+        expect((option || {}).text).toBe(`${i + 2020}`);
+      }
+    });
+
+    it('should limit year selection when restricted by min/max date', () => {
+      render(
+        <TestDatepicker
+          maxDate={gregorian.date(2023, 10, 13)}
+          minDate={gregorian.date(2021, 3, 13)}
+          options={{ selectYear: true, yearRange: '2020:2025' }}
+        />
+      );
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(3);
+      for (let i = 0; i < select.options.length; i += 1) {
+        const option = select.options.item(i);
+        expect((option || {}).text).toBe(`${i + 2021}`);
+      }
+    });
+
+    it('should not display years for selection when empty range', () => {
+      render(<TestDatepicker options={{ selectYear: true }}/>);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(0);
+    });
+
+    it('should not display years for selection when only one range value', () => {
+      render(<TestDatepicker options={{ selectYear: true, yearRange: '2020' }}/>);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(0);
+    });
+
+    it('should not display years for selection when invalid range', () => {
+      render(<TestDatepicker options={{ selectYear: true, yearRange: '2020:sometime' }}/>);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(select).toBeInTheDocument();
+      expect(select.options.length).toBe(0);
     });
 
     it('should respond to moving to the previous year', async () => {
@@ -220,6 +338,22 @@ describe('(Hook) useDatepicker', () => {
       await user.click(screen.getByRole('button', { name: 'Next year' }));
 
       expect(screen.getByRole('columnheader', { name: 'July 2023' })).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: '13' })).toHaveClass('selected');
+    });
+
+    it('should respond to setting the month', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Set month' }));
+
+      expect(screen.getByRole('columnheader', { name: 'May 2022' })).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: '13' })).toHaveClass('selected');
+    });
+
+    it('should respond to setting the year', async () => {
+      render(<TestDatepicker />);
+      await user.click(screen.getByRole('button', { name: 'Set year' }));
+
+      expect(screen.getByRole('columnheader', { name: 'July 2020' })).toBeInTheDocument();
       expect(screen.getByRole('cell', { name: '13' })).toHaveClass('selected');
     });
 

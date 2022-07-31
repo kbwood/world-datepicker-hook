@@ -2,11 +2,12 @@ import React from 'react';
 
 const Styles = () => {
   const styles = `
-    .datepicker { font-size: 24px; width: 18em; }
+    .datepicker { font-family: sans-serif; font-size: 24px; width: 18em; }
     .datepicker.ltr { direction: ltr; }
     .datepicker.rtl { direction: rtl; }
     .datepicker button { background-color: transparent; border: 0; cursor: pointer; font-size: 90%; padding: 0.5em; }
-    .datepicker button[disabled] { color: #888; }
+    .datepicker button[disabled] { color: #888; cursor: default; }
+  .datepicker select { border: 0; font-size: 24px; font-weight: bold; }
     .datepicker table { width: 100%; }
     .datepicker table button { width: 100%; }
     .datepicker td { text-align: center; }

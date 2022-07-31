@@ -1,5 +1,75 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`(Hook) useDatepicker Default should not show days in other months 1`] = `
+<tr>
+  <td
+    class="other   weekend"
+  >
+    <button
+      disabled=""
+      tabindex="-1"
+      type="button"
+    />
+  </td>
+  <td
+    class="other   "
+  >
+    <button
+      disabled=""
+      tabindex="-1"
+      type="button"
+    />
+  </td>
+  <td
+    class="other   "
+  >
+    <button
+      disabled=""
+      tabindex="-1"
+      type="button"
+    />
+  </td>
+  <td
+    class="other   "
+  >
+    <button
+      disabled=""
+      tabindex="-1"
+      type="button"
+    />
+  </td>
+  <td
+    class="other   "
+  >
+    <button
+      disabled=""
+      tabindex="-1"
+      type="button"
+    />
+  </td>
+  <td
+    class="   "
+  >
+    <button
+      tabindex="-1"
+      type="button"
+    >
+      1
+    </button>
+  </td>
+  <td
+    class="   weekend"
+  >
+    <button
+      tabindex="-1"
+      type="button"
+    >
+      2
+    </button>
+  </td>
+</tr>
+`;
+
 exports[`(Hook) useDatepicker Default should show the current month 1`] = `
 <tr>
   <td
