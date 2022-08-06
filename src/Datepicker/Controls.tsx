@@ -1,17 +1,29 @@
 import React from 'react';
 import { Datepicker } from '../useDatepicker';
+import { Localisation } from './types';
 
 type Props = {
-  datepicker: Datepicker
+  datepicker: Datepicker,
+  local: Localisation,
 }
 
-const Controls = ({ datepicker: { updates } }: Props) => (
+const Controls = ({ datepicker: { updates }, local }: Props) => (
   <div className="controls">
-    <button onClick={() => { updates.prevYear(); }} type="button">&lt;&lt;</button>
-    <button onClick={() => { updates.prevMonth(); }} type="button">&lt;</button>
-    <button onClick={() => { updates.today(); }} type="button">Today</button>
-    <button onClick={() => { updates.nextMonth(); }} type="button">&gt;</button>
-    <button onClick={() => { updates.nextYear(); }} type="button">&gt;&gt;</button>
+    <button aria-label={local.prevYearLabel} onClick={() => { updates.prevYear(); }} type="button">
+      {local.prevYear}
+    </button>
+    <button aria-label={local.prevMonthLabel} onClick={() => { updates.prevMonth(); }} type="button">
+      {local.prevMonth}
+    </button>
+    <button aria-label={local.todayLabel} onClick={() => { updates.today(); }} type="button">
+      {local.today}
+    </button>
+    <button aria-label={local.nextMonthLabel} onClick={() => { updates.nextMonth(); }} type="button">
+      {local.nextMonth}
+    </button>
+    <button aria-label={local.nextYearLabel} onClick={() => { updates.nextYear(); }} type="button">
+      {local.nextYear}
+    </button>
   </div>
 );
 

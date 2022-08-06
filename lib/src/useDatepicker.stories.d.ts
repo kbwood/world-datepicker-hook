@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { Story } from '@storybook/react';
 import '@kbwood/world-calendars/lib/Coptic';
 import '@kbwood/world-calendars/lib/Discworld';
 import '@kbwood/world-calendars/lib/Ethiopian';
@@ -26,9 +26,19 @@ import '@kbwood/world-calendars/lib/Thai';
 import '@kbwood/world-calendars/lib/l10n/Thai-th';
 import '@kbwood/world-calendars/lib/UmmAlQura';
 import '@kbwood/world-calendars/lib/l10n/UmmAlQura-ar';
+import './Datepicker/l10n/Datepicker-ar';
+import './Datepicker/l10n/Datepicker-fr';
+import './Datepicker/l10n/Datepicker-zh-CN';
 declare type Props = {
     calendarName: string;
-    language: string;
+    calendarLanguage: string;
+    date: string;
+    maxDate: string;
+    minDate: string;
+    selectDaysInOtherMonths: boolean;
+    selectMonth: boolean;
+    selectYear: boolean;
+    showDaysInOtherMonths: boolean;
 };
 declare const _default: {
     title: string;
@@ -37,11 +47,32 @@ declare const _default: {
             control: string;
             options: string[];
         };
-        language: {
+        calendarLanguage: {
             control: string;
             options: string[];
+        };
+        date: {
+            control: string;
+        };
+        maxDate: {
+            control: string;
+        };
+        minDate: {
+            control: string;
+        };
+        selectDaysInOtherMonths: {
+            control: string;
+        };
+        selectMonth: {
+            control: string;
+        };
+        selectYear: {
+            control: string;
+        };
+        showDaysInOtherMonths: {
+            control: string;
         };
     };
 };
 export default _default;
-export declare const Default: ({ calendarName, language }: Props) => JSX.Element;
+export declare const Default: Story<Props>;

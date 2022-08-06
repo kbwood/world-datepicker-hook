@@ -1,7 +1,16 @@
-import { MouseEventHandler } from 'react';
 import { CDate } from '@kbwood/world-calendars';
+declare type Notify = () => void;
 declare type NotifyDate = (date: CDate) => void;
-declare type CalendarDay = {
+declare type NotifyPeriod = (period: string | number) => void;
+declare type Current = {
+    date: CDate;
+    month: number;
+    monthName: string;
+    monthNameShort: string;
+    year: number;
+    yearLocal: string;
+};
+declare type Day = {
     date: CDate;
     isDisabled: boolean;
     isInCurrentMonth: boolean;
@@ -9,32 +18,66 @@ declare type CalendarDay = {
     isToday: boolean;
     isWeekend: boolean;
     label: string;
-    onClick: MouseEventHandler;
+    selectDay: Notify;
 };
-declare type DatepickerUpdates = {
-    nextDay: MouseEventHandler;
-    nextMonth: MouseEventHandler;
-    nextWeek: MouseEventHandler;
-    nextYear: MouseEventHandler;
-    prevDay: MouseEventHandler;
-    prevMonth: MouseEventHandler;
-    prevWeek: MouseEventHandler;
-    prevYear: MouseEventHandler;
-    weekEnd: MouseEventHandler;
-    weekStart: MouseEventHandler;
-};
-declare type MonthData = {
+declare type LocalDay = {
     name: string;
-    num: number;
+    nameMin: string;
+    nameShort: string;
+};
+declare type LocalMonth = {
+    disabled: boolean;
+    name: string;
+    nameShort: string;
+    value: number;
+};
+declare type LocalYear = {
+    name: string;
+    value: number;
+};
+declare type Local = {
+    days: LocalDay[];
+    isRTL: boolean;
+    months: LocalMonth[];
+    years: LocalYear[];
+};
+declare type Updates = {
+    nextDay: Notify;
+    nextMonth: Notify;
+    nextWeek: Notify;
+    nextYear: Notify;
+    prevDay: Notify;
+    prevMonth: Notify;
+    prevWeek: Notify;
+    prevYear: Notify;
+    setMonth: NotifyPeriod;
+    setYear: NotifyPeriod;
+    today: Notify;
+    weekEnd: Notify;
+    weekStart: Notify;
 };
 declare type Datepicker = {
-    calendarDays: CalendarDay[];
-    isRTL: boolean;
-    month: MonthData;
-    updates: DatepickerUpdates;
-    weekDays: string[];
-    year: number;
+    current: Current;
+    days: Day[][];
+    local: Local;
+    updates: Updates;
 };
-declare const useDatepicker: (onSelect: NotifyDate, calendarName: string, language?: string, date?: CDate) => Datepicker;
-export type { CalendarDay, Datepicker, DatepickerUpdates, MonthData, NotifyDate };
+declare type DisplayOptions = {
+    selectDaysInOtherMonths?: boolean;
+    selectMonth?: boolean;
+    selectYear?: boolean;
+    showDaysInOtherMonths?: boolean;
+    yearRange?: string;
+};
+declare type Props = {
+    calendarName: string;
+    date?: CDate;
+    language?: string;
+    maxDate?: CDate;
+    minDate?: CDate;
+    onSelect: NotifyDate;
+    options?: DisplayOptions;
+};
+declare const useDatepicker: ({ calendarName, date, language, maxDate, minDate, onSelect, options }: Props) => Datepicker;
+export type { Current, Datepicker, Day, DisplayOptions, Local, LocalDay, LocalMonth, LocalYear, Notify, NotifyDate, NotifyPeriod, Updates };
 export default useDatepicker;

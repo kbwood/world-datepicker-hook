@@ -1,7 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { localisations } from '../../src/Datepicker/Datepicker';
 import Header from '../../src/Datepicker/Header';
+import '../../src/Datepicker/l10n/Datepicker-fr';
 import { mockDatepicker } from './TestData';
 
 describe('(Component) Datepicker Header', () => {
@@ -19,7 +21,7 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header', () => {
-    const { container } = render(<Header datepicker={mockDatepicker} options={{}} />, { container: table });
+    const { container } = render(<Header datepicker={mockDatepicker} local={localisations['']} options={{}} />, { container: table });
 
     expect(container).toMatchInlineSnapshot(`
       <table>
@@ -90,8 +92,11 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header with selectable months', async () => {
-    render(<Header datepicker={mockDatepicker} options={{ selectMonth: true }} />, { container: table });
-    const select = screen.getByRole('combobox', { name: 'Select month' });
+    render(
+      <Header datepicker={mockDatepicker} local={localisations['']} options={{ selectMonth: true }} />,
+      { container: table }
+    );
+    const select = screen.getByRole('combobox', { name: 'Change the month' });
 
     expect(select).toBeInTheDocument();
 
@@ -103,10 +108,14 @@ describe('(Component) Datepicker Header', () => {
 
   it('should render a month header with selectable years', async () => {
     render(
-      <Header datepicker={mockDatepicker} options={{ selectYear: true, yearRange: '2015:2025' }} />,
+      <Header
+        datepicker={mockDatepicker}
+        local={localisations['']}
+        options={{ selectYear: true, yearRange: '2015:2025' }}
+      />,
       { container: table }
     );
-    const select = screen.getByRole('combobox', { name: 'Select year' });
+    const select = screen.getByRole('combobox', { name: 'Change the year' });
 
     expect(select).toBeInTheDocument();
 
@@ -114,5 +123,18 @@ describe('(Component) Datepicker Header', () => {
 
     expect(mockDatepicker.updates.setYear).toHaveBeenCalledTimes(1);
     expect(mockDatepicker.updates.setYear).toHaveBeenCalledWith('2020');
+  });
+
+  it('should render a month header with localisation', async () => {
+    render(
+      <Header
+        datepicker={mockDatepicker}
+        local={localisations.fr}
+        options={{ selectMonth: true, selectYear: true, yearRange: '2015:2025' }}
+      />,
+      { container: table }
+    );
+    expect(screen.getByRole('combobox', { name: 'Voir un autre mois' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Voir une autre année' })).toBeInTheDocument();
   });
 });

@@ -29,6 +29,9 @@ import '@kbwood/world-calendars/lib/l10n/Thai-th';
 import '@kbwood/world-calendars/lib/UmmAlQura';
 import '@kbwood/world-calendars/lib/l10n/UmmAlQura-ar';
 import Datepicker from './Datepicker';
+import './Datepicker/l10n/Datepicker-ar';
+import './Datepicker/l10n/Datepicker-fr';
+import './Datepicker/l10n/Datepicker-zh-CN';
 
 type Props = {
   calendarName: string,
