@@ -1,5 +1,6 @@
 import React from 'react';
 import { Datepicker, DisplayOptions } from '../useDatepicker';
+import * as S from './Header.styles';
 import { Localisation } from './types';
 
 type Props = {
@@ -14,9 +15,9 @@ const getMonth = (datepicker: Datepicker, local: Localisation, options: DisplayO
     return monthName;
   }
   return (
-    <select aria-label={local.monthLabel} onChange={(e) => { setMonth(e.target.value); }} value={month}>
+    <S.Select aria-label={local.monthLabel} onChange={(e) => { setMonth(e.target.value); }} value={month}>
       {months.map(({ disabled, name, value }) => <option key={name} disabled={disabled} value={value}>{name}</option>)}
-    </select>
+    </S.Select>
   );
 };
 
@@ -26,29 +27,29 @@ const getYear = (datepicker: Datepicker, local: Localisation, options: DisplayOp
     return yearLocal;
   }
   return (
-    <select aria-label={local.yearLabel} onChange={(e) => { setYear(e.target.value); }} value={year}>
+    <S.Select aria-label={local.yearLabel} onChange={(e) => { setYear(e.target.value); }} value={year}>
       {years.map(({ name, value }) => <option key={name} value={value}>{name}</option>)}
-    </select>
+    </S.Select>
   );
 };
 
 const Header = ({ datepicker, local, options }: Props) => {
   const { local: { days } } = datepicker;
   return (
-    <thead>
-      <tr key="month">
+    <S.TableHeader>
+      <S.MonthHeader key="month">
         <th colSpan={days.length}>
           {getMonth(datepicker, local, options)} {getYear(datepicker, local, options)}
         </th>
-      </tr>
-      <tr key="days">
+      </S.MonthHeader>
+      <S.WeekHeader key="week">
         {days.map(({ name, nameMin }) => (
           <th key={name}>
             <abbr title={name}>{nameMin}</abbr>
           </th>
         ))}
-      </tr>
-    </thead>
+      </S.WeekHeader>
+    </S.TableHeader>
   );
 };
 

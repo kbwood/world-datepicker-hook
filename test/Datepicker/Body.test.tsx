@@ -1,12 +1,21 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Body from '../../src/Datepicker/Body';
+import defaultTheme from '../../src/Datepicker/theme';
 import { mockDatepicker } from './TestData';
 
 describe('(Component) Datepicker Body', () => {
   const user = userEvent.setup();
   let table: HTMLTableElement;
+  const renderBody = () =>
+    render(
+      <ThemeProvider theme={defaultTheme}>
+        <Body datepicker={mockDatepicker} />
+      </ThemeProvider>,
+      { container: table }
+    );
 
   beforeEach(() => {
     table = document.createElement('table');
@@ -19,29 +28,107 @@ describe('(Component) Datepicker Body', () => {
   });
 
   it('should render a month body', () => {
-    render(<Body datepicker={mockDatepicker} />, { container: table });
+    renderBody();
 
     expect(screen.getAllByRole('row')).toHaveLength(3);
-    expect(screen.getByRole('row', { name: '26 27 28 29 30 1 2' })).toBeInTheDocument();
-    expect(screen.getByRole('row', { name: '3 4 5 6 7 8 9' })).toBeInTheDocument();
-    expect(screen.getByRole('row', { name: '10 11 12 13 14 15 16' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('row', { name: '26 27 28 29 30 1 2' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('row', { name: '3 4 5 6 7 8 9' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('row', { name: '10 11 12 13 14 15 16' })
+    ).toBeInTheDocument();
   });
 
   it('should render days with classes', () => {
-    render(<Body datepicker={mockDatepicker} />, { container: table });
-    const cells = screen.getAllByRole('cell');
+    renderBody();
 
-    expect(cells).toHaveLength(21);
-    const classes = ['other weekend', 'other', 'other', 'other', 'other', '', 'weekend',
-      'selected weekend', '', '', '', '', '', 'weekend',
-      'weekend', 'today', '', '', '', '', 'weekend'];
-    cells.forEach((cell, i) => {
-      expect((cell.getAttribute('class') || '').replace(/\s+/g, ' ').trim()).toBe(classes[i]);
-    });
+    expect(screen.getByRole('cell', { name: '26' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi jESjDg"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          disabled=""
+          tabindex="-1"
+          type="button"
+        >
+          26
+        </button>
+      </td>
+    `);
+    expect(screen.getByRole('cell', { name: '27' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi hrptdS"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          disabled=""
+          tabindex="-1"
+          type="button"
+        >
+          27
+        </button>
+      </td>
+    `);
+    expect(screen.getByRole('cell', { name: '1' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi fWUjA-d"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          tabindex="-1"
+          type="button"
+        >
+          1
+        </button>
+      </td>
+    `);
+    expect(screen.getByRole('cell', { name: '2' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi jESjDg"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          tabindex="-1"
+          type="button"
+        >
+          2
+        </button>
+      </td>
+    `);
+    expect(screen.getByRole('cell', { name: '3' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi cbYRnl"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          tabindex="0"
+          type="button"
+        >
+          3
+        </button>
+      </td>
+    `);
+    expect(screen.getByRole('cell', { name: '11' })).toMatchInlineSnapshot(`
+      <td
+        class="sc-gsnTZi jnGANC"
+      >
+        <button
+          class="sc-dkzDqf iomTHQ"
+          tabindex="-1"
+          type="button"
+        >
+          11
+        </button>
+      </td>
+    `);
   });
 
   it('should disable days from other months', () => {
-    render(<Body datepicker={mockDatepicker} />, { container: table });
+    renderBody();
     const buttons = screen.getAllByRole('button');
 
     expect(buttons).toHaveLength(21);
@@ -51,20 +138,20 @@ describe('(Component) Datepicker Body', () => {
   });
 
   it('should only have one tab target', () => {
-    const { container } = render(<Body datepicker={mockDatepicker} />, { container: table });
+    const { container } = renderBody();
 
     expect(container.querySelectorAll('button[tabIndex="0"]')).toHaveLength(1);
   });
 
   it('should respond to selection of a date', async () => {
-    render(<Body datepicker={mockDatepicker} />, { container: table });
+    renderBody();
     await user.click(screen.getByRole('button', { name: '5' }));
 
     expect(mockDatepicker.days[1][2].selectDay).toHaveBeenCalledTimes(1);
   });
 
   it('should respond to keyboard entries', async () => {
-    const { container } = render(<Body datepicker={mockDatepicker} />, { container: table });
+    const { container } = renderBody();
     act(() => {
       const button = container.querySelector('button[tabIndex="0"]');
       if (button) {

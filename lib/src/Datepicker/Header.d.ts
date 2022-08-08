@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Datepicker, DisplayOptions } from '../useDatepicker';
 import { Localisation } from './types';
 declare type Props = {

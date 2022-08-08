@@ -30,6 +30,7 @@ import './Datepicker/l10n/Datepicker-ar';
 import './Datepicker/l10n/Datepicker-fr';
 import './Datepicker/l10n/Datepicker-zh-CN';
 declare type Props = {
+    alternateTheme: boolean;
     calendarName: string;
     calendarLanguage: string;
     date: string;
@@ -43,6 +44,9 @@ declare type Props = {
 declare const _default: {
     title: string;
     argTypes: {
+        alternateTheme: {
+            control: string;
+        };
         calendarName: {
             control: string;
             options: string[];

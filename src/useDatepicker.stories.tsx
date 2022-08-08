@@ -32,8 +32,10 @@ import Datepicker from './Datepicker';
 import './Datepicker/l10n/Datepicker-ar';
 import './Datepicker/l10n/Datepicker-fr';
 import './Datepicker/l10n/Datepicker-zh-CN';
+import { Theme } from './Datepicker/theme';
 
 type Props = {
+  alternateTheme: boolean,
   calendarName: string,
   calendarLanguage: string,
   date: string,
@@ -45,9 +47,40 @@ type Props = {
   showDaysInOtherMonths: boolean,
 }
 
+const altTheme: Theme = {
+  color: {
+    border: '#264053',
+    controlsBG: '#fff',
+    controlsFG: '#000',
+    dayBG: '#dfeffc',
+    dayBorder: '#c5dbec',
+    dayFG: '#000',
+    monthBG: '#264053',
+    monthFG: '#fff',
+    otherMonthBG: '#fff',
+    otherMonthFG: '#000',
+    selectedBG: '#264053',
+    selectedFG: '#fff',
+    todayBG: '#fad42e',
+    todayFG: '#000',
+    unselectableFG: '#888',
+    weekBG: '#fff',
+    weekFG: '#000',
+    weekendBG: '#d0e5f5',
+    weekendFG: '#000'
+  },
+  font: {
+    family: '"Times New Roman",serif',
+    selectedWeight: 'bold',
+    sizeBody: '24px',
+    sizeHeader: '28px'
+  }
+};
+
 export default {
   title: 'Datepicker',
   argTypes: {
+    alternateTheme: { control: 'boolean' },
     calendarName: {
       control: 'select',
       options: ['Coptic', 'Discworld', 'Ethiopian', 'Gregorian', 'Hebrew', 'Islamic', 'Julian',
@@ -86,6 +119,7 @@ const getDate = (calendar: CalendarBase, date: string = ''): CDate | undefined =
 };
 
 const Template: Story<Props> = ({
+  alternateTheme,
   calendarName = 'Gregorian',
   calendarLanguage = '',
   date: inDate,
@@ -101,7 +135,8 @@ const Template: Story<Props> = ({
   }, []);
   const language = calendarLanguage.split(' ')[0];
   const calendar = Calendars.instance(calendarName, language);
-
+  const options = { selectDaysInOtherMonths, selectMonth, selectYear, showDaysInOtherMonths, yearRange: '2000:2040' };
+  const theme = alternateTheme ? altTheme : undefined;
   return <Datepicker
     calendarName={calendarName}
     date={getDate(calendar, inDate)}
@@ -109,12 +144,14 @@ const Template: Story<Props> = ({
     maxDate={getDate(calendar, inMaxDate)}
     minDate={getDate(calendar, inMinDate)}
     onSelect={onSelect}
-    options={{ selectDaysInOtherMonths, selectMonth, selectYear, showDaysInOtherMonths, yearRange: '2000:2040' }}
+    options={options}
+    theme={theme}
   />;
 };
 
 export const Default = Template.bind({});
 Default.args = {
+  alternateTheme: false,
   calendarName: 'Gregorian',
   calendarLanguage: '  (Default)',
   date: 'yyyy-mm-dd',

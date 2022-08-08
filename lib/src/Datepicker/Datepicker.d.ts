@@ -1,6 +1,6 @@
-/// <reference types="react" />
 import { CDate } from '@kbwood/world-calendars';
 import { DisplayOptions } from '../useDatepicker';
+import { Theme } from './theme';
 import { Localisation } from './types';
 declare type Props = {
     calendarName: string;
@@ -10,12 +10,13 @@ declare type Props = {
     minDate?: CDate;
     onSelect: (date: CDate) => void;
     options?: DisplayOptions;
+    theme?: Theme;
 };
 declare type LocalisationsMap = {
     [index: string]: Localisation;
 };
 declare const localisations: LocalisationsMap;
-declare const Datepicker: ({ calendarName, date, language, maxDate, minDate, onSelect, options }: Props) => JSX.Element;
-export { localisations };
+declare const Datepicker: ({ calendarName, date, language, maxDate, minDate, onSelect, options, theme }: Props) => JSX.Element;
 export type { Props };
+export { localisations };
 export default Datepicker;

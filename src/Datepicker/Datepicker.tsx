@@ -1,10 +1,12 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { CDate } from '@kbwood/world-calendars';
 import useDatepicker, { DisplayOptions } from '../useDatepicker';
 import Body from './Body';
 import Controls from './Controls';
+import * as S from './Datepicker.styles';
 import Header from './Header';
-import Styles from './Styles';
+import defaultTheme, { Theme } from './theme';
 import { Localisation } from './types';
 
 type Props = {
@@ -15,6 +17,7 @@ type Props = {
   minDate?: CDate,
   onSelect: (date: CDate) => void,
   options?: DisplayOptions,
+  theme?: Theme,
 }
 type LocalisationsMap = {
   [index: string]: Localisation,
@@ -52,22 +55,25 @@ const localisations: LocalisationsMap = {
 
 const noOptions: DisplayOptions = {};
 
-const Datepicker = ({ calendarName, date, language = '', maxDate, minDate, onSelect, options = noOptions }: Props) => {
+const Datepicker = (
+  { calendarName, date, language = '', maxDate, minDate, onSelect, options = noOptions, theme = defaultTheme }: Props
+) => {
   const datepicker = useDatepicker({ calendarName, date, language, maxDate, minDate, onSelect, options });
   const local = localisations[language || ''] || localisations[''];
   const monthLabel = `${datepicker.current.monthName} ${datepicker.current.year}`;
   return (
-    <div className={`datepicker ${datepicker.local.isRTL ? 'rtl' : 'ltr'}`}>
-      <Styles />
-      <Controls datepicker={datepicker} local={local} />
-      <table aria-label={monthLabel}>
-        <Header datepicker={datepicker} local={local} options={options} />
-        <Body datepicker={datepicker} />
-      </table>
-    </div>
+    <ThemeProvider theme={theme}>
+      <S.Datepicker isRTL={datepicker.local.isRTL}>
+        <Controls datepicker={datepicker} local={local} />
+        <S.MonthTable aria-label={monthLabel}>
+          <Header datepicker={datepicker} local={local} options={options} />
+          <Body datepicker={datepicker} />
+        </S.MonthTable>
+      </S.Datepicker>
+    </ThemeProvider>
   );
 };
 
-export { localisations };
 export type { Props };
+export { localisations };
 export default Datepicker;

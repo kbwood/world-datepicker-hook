@@ -1,14 +1,23 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { localisations } from '../../src/Datepicker/Datepicker';
 import Header from '../../src/Datepicker/Header';
+import defaultTheme from '../../src/Datepicker/theme';
 import '../../src/Datepicker/l10n/Datepicker-fr';
 import { mockDatepicker } from './TestData';
 
 describe('(Component) Datepicker Header', () => {
   const user = userEvent.setup();
   let table: HTMLTableElement;
+  const renderHeader = (options = {}, local = localisations['']) =>
+    render(
+      <ThemeProvider theme={defaultTheme}>
+        <Header datepicker={mockDatepicker} local={local} options={options} />
+      </ThemeProvider>,
+      { container: table }
+    );
 
   beforeEach(() => {
     table = document.createElement('table');
@@ -21,12 +30,16 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header', () => {
-    const { container } = render(<Header datepicker={mockDatepicker} local={localisations['']} options={{}} />, { container: table });
+    const { container } = renderHeader();
 
     expect(container).toMatchInlineSnapshot(`
       <table>
-        <thead>
-          <tr>
+        <thead
+          class="sc-ftvSup cPdYDC"
+        >
+          <tr
+            class="sc-papXJ gPjacy"
+          >
             <th
               colspan="7"
             >
@@ -35,7 +48,9 @@ describe('(Component) Datepicker Header', () => {
               2022
             </th>
           </tr>
-          <tr>
+          <tr
+            class="sc-jqUVSM cuPygD"
+          >
             <th>
               <abbr
                 title="Sunday"
@@ -92,10 +107,7 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header with selectable months', async () => {
-    render(
-      <Header datepicker={mockDatepicker} local={localisations['']} options={{ selectMonth: true }} />,
-      { container: table }
-    );
+    renderHeader({ selectMonth: true });
     const select = screen.getByRole('combobox', { name: 'Change the month' });
 
     expect(select).toBeInTheDocument();
@@ -107,14 +119,7 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header with selectable years', async () => {
-    render(
-      <Header
-        datepicker={mockDatepicker}
-        local={localisations['']}
-        options={{ selectYear: true, yearRange: '2015:2025' }}
-      />,
-      { container: table }
-    );
+    renderHeader({ selectYear: true, yearRange: '2015:2025' });
     const select = screen.getByRole('combobox', { name: 'Change the year' });
 
     expect(select).toBeInTheDocument();
@@ -126,15 +131,16 @@ describe('(Component) Datepicker Header', () => {
   });
 
   it('should render a month header with localisation', async () => {
-    render(
-      <Header
-        datepicker={mockDatepicker}
-        local={localisations.fr}
-        options={{ selectMonth: true, selectYear: true, yearRange: '2015:2025' }}
-      />,
-      { container: table }
+    renderHeader(
+      { selectMonth: true, selectYear: true, yearRange: '2015:2025' },
+      localisations.fr
     );
-    expect(screen.getByRole('combobox', { name: 'Voir un autre mois' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Voir une autre année' })).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('combobox', { name: 'Voir un autre mois' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: 'Voir une autre année' })
+    ).toBeInTheDocument();
   });
 });
